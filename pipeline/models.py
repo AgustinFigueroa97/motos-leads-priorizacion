@@ -91,7 +91,7 @@ class Cliente(Base):
     telefono_normalizado = Column(String, nullable=False)  # 10 dígitos, Colombia
     email = Column(String)
     ciudad_normalizada = Column(String)
-    empresa_id = Column(String, ForeignKey("empresas.empresa_id"), nullable=False)
+    empresa_id = Column(String, ForeignKey("empresas.empresa_id"), nullable=False, index=True)
 
     __table_args__ = (
         UniqueConstraint("telefono_normalizado", "empresa_id", name="uq_cliente_telefono_empresa"),
@@ -103,13 +103,14 @@ class Lead(Base):
 
     lead_id = Column(String, primary_key=True)
     cliente_id = Column(Integer, ForeignKey("clientes.cliente_id"), nullable=False)
-    empresa_id = Column(String, ForeignKey("empresas.empresa_id"), nullable=False)
-    punto_venta_id = Column(String, ForeignKey("puntos_venta.punto_venta_id"), nullable=False)
+    empresa_id = Column(String, ForeignKey("empresas.empresa_id"), nullable=False, index=True)
+    punto_venta_id = Column(String, ForeignKey("puntos_venta.punto_venta_id"), nullable=False, index=True)
     canal = Column(String, nullable=False)
     fecha_registro = Column(DateTime, nullable=False)
-    modelo_interes_texto = Column(Text)  # original, para auditoría
-    sku_matcheado = Column(String, ForeignKey("motos_catalogo.sku"), nullable=True)  # NULL si fuzzy no confiable
-    estado_gestion = Column(String, nullable=False)
+    fecha_registro_supuesta = Column(Boolean, nullable=False, default=False)
+    modelo_interes_texto = Column(Text)
+    sku_matcheado = Column(String, ForeignKey("motos_catalogo.sku"), nullable=True)
+    estado_gestion = Column(String, nullable=False, index=True)
     fecha_primer_contacto = Column(DateTime, nullable=True)
     campania = Column(String)
 
@@ -144,7 +145,7 @@ class LeadScore(Base):
 
     lead_id = Column(String, ForeignKey("leads.lead_id"), primary_key=True)
     score = Column(Numeric(5, 2), nullable=False)
-    temperatura = Column(String, nullable=False)  # Frío / Tibio / Caliente
+    temperatura = Column(String, nullable=False, index=True)  # Frío / Tibio / Caliente
     factores_json = Column(JSONB, nullable=False)  # qué pesó y cuánto, para explicabilidad
     fecha_calculo = Column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -158,7 +159,7 @@ class Asignacion(Base):
     __tablename__ = "asignaciones"
 
     lead_id = Column(String, ForeignKey("leads.lead_id"), primary_key=True)
-    asesor_id = Column(String, ForeignKey("asesores.asesor_id"), nullable=False)
+    asesor_id = Column(String, ForeignKey("asesores.asesor_id"), nullable=False, index=True)
     fecha_asignacion = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
