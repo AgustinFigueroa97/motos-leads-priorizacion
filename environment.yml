@@ -1,0 +1,21 @@
+name: motos-leads
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - scikit-learn
+  - psycopg2
+  - sqlalchemy
+  - python-dotenv
+  - pip
+  - pip:
+      - fastapi
+      - "uvicorn[standard]"
+      - apscheduler
+      - openai
+      - rapidfuzz
+      - pydantic
+      - phonenumbers
