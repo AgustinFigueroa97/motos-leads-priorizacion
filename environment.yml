@@ -19,3 +19,4 @@ dependencies:
       - rapidfuzz
       - pydantic
       - phonenumbers
+      - alembic
