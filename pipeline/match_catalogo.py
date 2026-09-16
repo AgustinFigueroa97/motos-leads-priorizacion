@@ -4,7 +4,7 @@ match_catalogo.py — Fuzzy match de modelo_interes_texto contra el catálogo
 Criterio conservador (ya decidido): si la similitud es alta, asigna el
 SKU. Si es dudosa o el texto es insuficiente (solo marca, vacío), queda
 sku_matcheado=None en vez de forzar un match — mejor "no sé" que un
-match falso que después no se puede defender en la sustentación.
+match falso.
 """
 import pandas as pd
 from rapidfuzz import fuzz, process
