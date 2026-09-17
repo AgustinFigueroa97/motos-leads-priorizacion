@@ -116,3 +116,16 @@ print(f"(El cuartil de score más alto cierra {q4/q1:.1f} veces más que el cuar
 print("\n--- Cortes de score por cuartil (para temperatura en producción) ---")
 cortes = df["score"].quantile([0.25, 0.5, 0.75]).round(1)
 print(cortes)
+
+"""
+Tenés 2021 leads históricos. A cada uno le calculaste su score (un número de 0 a 100, según cuántas señales buenas tuvo). Ahora imaginate que ordenás esos 2021 números de menor a mayor, todos en una sola fila, del score más bajo al más alto:
+
+[2.1, 3.5, 5.0, ... , 33.7, ... , 49.1, ... , 61.6, ... , 95.8]
+ ↑                      ↑          ↑          ↑              ↑
+lead #1              lead #505  lead #1010 lead #1515   lead #2021
+(peor score)                                             (mejor score)
+
+Ahora contás: si vas caminando por esa fila ordenada, ¿en qué valor de score estás parado cuando ya recorriste el primer 25% de los leads (o sea, cuando pasás el lead #505, que es el 25% de 2021)? La respuesta es: en ese punto, el score que tenés en la mano es 33.7.
+
+Eso es literalmente lo que significa: "el 25% de los leads (los peores 505) tienen un score menor o igual a 33.7". No es que el 33.7 tenga algo mágico — es simplemente el valor que encontraste al contar hasta el lead número 505 en la fila ordenada.
+"""

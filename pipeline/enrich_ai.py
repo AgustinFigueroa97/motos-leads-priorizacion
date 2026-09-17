@@ -199,6 +199,7 @@ def enriquecer_conversaciones(limite: int | None = None) -> pd.DataFrame:
             fila = extraccion.model_dump()
             fila["conversacion_id"] = conv["conversacion_id"]
             fila["lead_id"] = conv["lead_id"]
+            fila["fecha_inicio"] = conv["fecha_inicio"]
             resultados.append(fila)
         except Exception as e:
             errores.append({"conversacion_id": conv.get("conversacion_id"), "error": str(e)})
@@ -212,8 +213,10 @@ def enriquecer_conversaciones(limite: int | None = None) -> pd.DataFrame:
             print(f"  - {err['conversacion_id']}: {err['error']}")
 
     df = pd.DataFrame(resultados)
+    df = quedarse_con_mas_reciente(df)
+    
     columnas_orden = [
-        "lead_id", "conversacion_id",
+        "lead_id", "conversacion_id", "fecha_inicio",
         "manifesto_cuota_inicial", "presupuesto_cuota_inicial",
         "forma_pago_declarada", "pidio_cita",
         "modelo_interes_ia", "intencion_declarada", "objecion_principal",
@@ -223,6 +226,21 @@ def enriquecer_conversaciones(limite: int | None = None) -> pd.DataFrame:
     for col in ["modelo_interes_ia", "intencion_declarada", "objecion_principal"]:
         df[col] = df[col].apply(limpiar_texto)
 
+    return df
+
+def quedarse_con_mas_reciente(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Si un lead tiene más de una conversación, se queda con la más
+    reciente (criterio ya definido en models.py). Usa fecha_inicio
+    de la conversación para decidir cuál es "más reciente".
+    """
+    if df["lead_id"].duplicated().any():
+        antes = len(df)
+        df = df.sort_values("fecha_inicio", ascending=False).drop_duplicates(
+            subset="lead_id", keep="first"
+        )
+        despues = len(df)
+        print(f"  {antes - despues} conversaciones duplicadas por lead_id -> se conserva la más reciente")
     return df
 
 
