@@ -190,17 +190,30 @@ def parsear_fecha(valor: str) -> tuple[datetime | None, bool]:
 # ============================================================
 
 def normalizar_leads() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Devuelve (leads_normalizados, leads_en_cuarentena).
-
-    leads_en_cuarentena: filas que no se pudieron normalizar
-    (ej. fecha inválida, teléfono irrecuperable) — se documentan
-    aparte, no entran al resto del pipeline.
-    """
     df = cargar_leads()
 
     # --- normalizaciones campo por campo ---
     df["canal_norm"] = df["canal"].apply(normalizar_canal)
+
+    # Corrección: si el lead tiene una conversación de WhatsApp
+    # asociada, el canal real es WhatsApp, más allá de lo que diga
+    # leads.csv. Una conversación de chat con mensajes solo puede
+    # existir si el contacto fue por WhatsApp (Meta Ads y Formulario
+    # Web son formularios de una sola vez, no generan chat) -- así
+    # que se corrige el campo con la fuente más confiable disponible.
+    from pipeline.ingest import cargar_conversaciones
+    conversaciones = cargar_conversaciones()
+    leads_con_conversacion = set(c["lead_id"] for c in conversaciones)
+
+    mask_canal_incorrecto = (
+        df["lead_id"].isin(leads_con_conversacion)
+        & (df["canal_norm"] != "WhatsApp")
+    )
+    cantidad_corregidos = mask_canal_incorrecto.sum()
+    if cantidad_corregidos:
+        print(f"  {cantidad_corregidos} leads con canal corregido a WhatsApp (tenían conversación asociada)")
+    df.loc[mask_canal_incorrecto, "canal_norm"] = "WhatsApp"
+
     df["estado_gestion_norm"] = df["estado_gestion"].apply(normalizar_estado)
     df["telefono_norm"] = df["telefono"].apply(normalizar_telefono)
     df["ciudad_norm"] = df["ciudad"].apply(normalizar_ciudad)
